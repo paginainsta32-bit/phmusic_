@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Spotify - Jamendo Edition</title>
+  <title>Meu Spotify - Audius</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>🎵 Jamendo Stream</h1>
+      <h1>🎵 Audius Stream</h1>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Buscar música, artista ou gênero (ex: rock)...">
+        <input type="text" id="searchInput" placeholder="Buscar música, artista ou gênero (ex: lofi, electronic)...">
         <button id="searchBtn">Buscar</button>
       </div>
     </header>
 
     <main id="resultsList" class="results-grid">
-      <!-- Músicas vão aparecer aqui -->
+      <!-- Músicas do Audius serão renderizadas aqui -->
     </main>
 
     <!-- Player Fixo no Rodapé -->
@@ -30,7 +30,7 @@
         </div>
       </div>
       
-      <!-- Control do Áudio Nativo sem Anúncios -->
+      <!-- Player de Áudio Nativo HTML5 (Zero anúncios / Roda em 2º plano) -->
       <div class="audio-container">
         <audio id="audioPlayer" controls autoplay style="width: 100%; max-width: 400px; height: 40px;"></audio>
       </div>
