@@ -1,57 +1,65 @@
-﻿const API_KEY = 'AIzaSyDL50wL4YCySX2UFmvA5CEct5AhNDwAlmI'; // Insira sua API Key do Google aqui
+// Client ID genérico público do Jamendo
+const JAMENDO_CLIENT_ID = '56b49278';
 
-let player;
+const audioPlayer = document.getElementById('audioPlayer');
 
-// Inicializa o Player IFrame do YouTube
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('youtubePlayer', {
-    height: '60',
-    width: '200',
-    videoId: '',
-    playerVars: { 'autoplay': 1, 'controls': 1 }
-  });
-}
-
-// Evento de Busca
+// Eventos de Busca
 document.getElementById('searchBtn').addEventListener('click', searchMusic);
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') searchMusic();
+});
 
 async function searchMusic() {
-  const query = document.getElementById('searchInput').value;
+  const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${API_KEY}`;
+  // Endpoint do Jamendo buscando por faixas que combinem com o nome ou tags
+  const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=jsonpretty&limit=16&namesearch=${encodeURIComponent(query)}&audioformat=mp32`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
-    renderResults(data.items);
+    
+    if (data.results && data.results.length > 0) {
+      renderResults(data.results);
+    } else {
+      alert('Nenhuma música encontrada com esse termo.');
+    }
   } catch (err) {
-    console.error('Erro ao buscar músicas:', err);
+    console.error('Erro ao buscar músicas no Jamendo:', err);
   }
 }
 
-function renderResults(items) {
+function renderResults(tracks) {
   const list = document.getElementById('resultsList');
   list.innerHTML = '';
 
-  items.forEach(item => {
+  tracks.forEach(track => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <img src="${item.snippet.thumbnails.high.url}" alt="Capa">
-      <h3>${item.snippet.title}</h3>
-      <p style="font-size:12px; color:#aaa;">${item.snippet.channelTitle}</p>
+      <img src="${track.image || 'https://via.placeholder.com/150'}" alt="Capa">
+      <h3>${track.name}</h3>
+      <p style="font-size:12px; color:#aaa;">${track.artist_name}</p>
     `;
-    card.onclick = () => playSong(item.id.videoId, item.snippet.title, item.snippet.channelTitle, item.snippet.thumbnails.high.url);
+    
+    // Ao clicar, toca diretamente o stream MP3 da faixa
+    card.onclick = () => playSong(track.audio, track.name, track.artist_name, track.image);
     list.appendChild(card);
   });
 }
 
-function playSong(videoId, title, channel, thumb) {
-  if (player && player.loadVideoById) {
-    player.loadVideoById(videoId);
-    document.getElementById('playerTitle').innerText = title;
-    document.getElementById('playerChannel').innerText = channel;
-    document.getElementById('playerThumb').src = thumb;
-  }
+function playSong(audioUrl, title, artist, thumb) {
+  audioPlayer.src = audioUrl;
+  audioPlayer.play();
+
+  document.getElementById('playerTitle').innerText = title;
+  document.getElementById('playerChannel').innerText = artist;
+  document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
 }
+
+// Ao abrir o app, faz uma busca inicial automática por músicas populares
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('searchInput').value = 'rock';
+  searchMusic();
+});
