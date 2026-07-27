@@ -1,5 +1,5 @@
-// Client ID público do Jamendo
-const JAMENDO_CLIENT_ID = '56b49278';
+// Servidor de entrada da rede descentralizada Audius
+const AUDIUS_API = 'https://discoveryprovider.audius.co/v1';
 
 const audioPlayer = document.getElementById('audioPlayer');
 
@@ -12,20 +12,21 @@ async function searchMusic() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  // Busca mais abrangente usando fuzzysearch (busca aproximada em títulos, tags e artistas)
-  const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=jsonpretty&limit=20&fuzzysearch=${encodeURIComponent(query)}&audioformat=mp32`;
+  // Busca faixas por qualquer palavra-chave, gênero ou artista
+  const url = `${AUDIUS_API}/tracks/search?query=${encodeURIComponent(query)}&app_name=MEU_SPOTIFY_APP`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
     
-    if (data.results && data.results.length > 0) {
-      renderResults(data.results);
+    if (data.data && data.data.length > 0) {
+      renderResults(data.data);
     } else {
-      alert('Nenhuma música encontrada. Tente buscar por um gênero em inglês como "rock", "pop", "jazz", "acoustic" ou "ambient".');
+      alert('Nenhuma música encontrada. Tente outro termo de busca.');
     }
   } catch (err) {
-    console.error('Erro ao buscar músicas no Jamendo:', err);
+    console.error('Erro ao buscar músicas no Audius:', err);
+    alert('Erro de conexão ao buscar faixas.');
   }
 }
 
@@ -34,15 +35,21 @@ function renderResults(tracks) {
   list.innerHTML = '';
 
   tracks.forEach(track => {
+    // Imagem de capa (ou placeholder se não houver)
+    const coverUrl = track.artwork ? track.artwork['150x150'] : 'https://via.placeholder.com/150';
+    
+    // URL direta do stream MP3 de alta velocidade
+    const streamUrl = `${AUDIUS_API}/tracks/${track.id}/stream?app_name=MEU_SPOTIFY_APP`;
+
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <img src="${track.image || 'https://via.placeholder.com/150'}" alt="Capa">
-      <h3>${track.name}</h3>
-      <p style="font-size:12px; color:#aaa;">${track.artist_name}</p>
+      <img src="${coverUrl}" alt="Capa">
+      <h3>${track.title}</h3>
+      <p style="font-size:12px; color:#aaa;">${track.user.name}</p>
     `;
     
-    card.onclick = () => playSong(track.audio, track.name, track.artist_name, track.image);
+    card.onclick = () => playSong(streamUrl, track.title, track.user.name, coverUrl);
     list.appendChild(card);
   });
 }
@@ -56,14 +63,14 @@ function playSong(audioUrl, title, artist, thumb) {
   document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
 }
 
-// Ao abrir, faz a busca por músicas populares em destaque
+// Ao abrir o site, carrega automaticamente as faixas em alta no Audius
 window.addEventListener('DOMContentLoaded', async () => {
-  const popularUrl = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=jsonpretty&limit=20&order=popularity_week&audioformat=mp32`;
+  const trendingUrl = `${AUDIUS_API}/tracks/trending?app_name=MEU_SPOTIFY_APP`;
   try {
-    const res = await fetch(popularUrl);
+    const res = await fetch(trendingUrl);
     const data = await res.json();
-    if (data.results) renderResults(data.results);
+    if (data.data) renderResults(data.data);
   } catch (e) {
-    console.error(e);
+    console.error('Erro ao carregar faixas populares:', e);
   }
 });
