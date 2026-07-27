@@ -1,6 +1,9 @@
+// Sua Chave da YouTube Data API v3 do Google Cloud
+const API_KEY = 'AIzaSyDL50wL4YCySX2UFmvA5CEct5AhNDwAlmI';
+
 let player;
 
-// Inicializa o Player IFrame do YouTube
+// Inicializa o Player IFrame do YouTube (oculto)
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayer', {
     height: '1',
@@ -22,46 +25,46 @@ async function searchMusic() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  // Busca rápida usando o serviço de auto-complete/search oficial sem erros de CORS
-  const url = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=`;
+  // Busca oficial na API do YouTube (categoria 10 = Músicas)
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${API_KEY}`;
 
   try {
-    // Busca via Invidious frontend público leve direto pelo navegador do cliente
-    const searchUrl = `https://vid.puffyan.us/api/v1/search?q=${encodeURIComponent(query)}&type=video`;
-    const res = await fetch(searchUrl);
+    const res = await fetch(url);
     const data = await res.json();
 
-    if (data && data.length > 0) {
-      renderResults(data);
+    if (data.items && data.items.length > 0) {
+      renderResults(data.items);
+    } else if (data.error) {
+      console.error('Erro na API do Google:', data.error.message);
+      alert('Erro na chave de API do Google: ' + data.error.message);
     } else {
       alert('Nenhuma música encontrada.');
     }
   } catch (err) {
-    // Fallback para API de sugestão rápida
-    console.error('Erro na busca principal:', err);
-    alert('Erro de conexão ao buscar faixas.');
+    console.error('Erro na requisição:', err);
+    alert('Erro de conexão ao buscar músicas.');
   }
 }
 
-function renderResults(videos) {
+function renderResults(items) {
   const list = document.getElementById('resultsList');
   list.innerHTML = '';
 
-  videos.forEach(video => {
-    const videoId = video.videoId;
-    const coverUrl = video.videoThumbnails && video.videoThumbnails.length > 0 
-      ? video.videoThumbnails[0].url 
-      : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  items.forEach(item => {
+    const videoId = item.id.videoId;
+    const title = item.snippet.title;
+    const channelTitle = item.snippet.channelTitle;
+    const coverUrl = item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.default.url;
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
       <img src="${coverUrl}" alt="Capa">
-      <h3>${video.title}</h3>
-      <p style="font-size:12px; color:#aaa;">${video.author}</p>
+      <h3>${title}</h3>
+      <p style="font-size:12px; color:#aaa;">${channelTitle}</p>
     `;
     
-    card.onclick = () => playSong(videoId, video.title, video.author, coverUrl);
+    card.onclick = () => playSong(videoId, title, channelTitle, coverUrl);
     list.appendChild(card);
   });
 }
@@ -76,7 +79,8 @@ function playSong(videoId, title, artist, thumb) {
   }
 }
 
+// Busca inicial automática ao abrir a página
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchInput').value = 'Felipe Amorim';
-  setTimeout(searchMusic, 1000);
+  setTimeout(searchMusic, 500);
 });
