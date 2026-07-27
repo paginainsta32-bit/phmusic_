@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🎵 Meu Spotify</h1>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar música ou artista...">
+        <button id="searchBtn">Buscar</button>
+      </div>
+    </header>
+
+    <main id="resultsList" class="results-grid">
+      <!-- Músicas buscadas aparecerão aqui -->
+    </main>
+
+    <!-- Player Fixo Estilo Spotify no Rodapé -->
+    <footer class="player-bar">
+      <div class="track-info">
+        <img id="playerThumb" src="https://via.placeholder.com/60" alt="Capa">
+        <div>
+          <p id="playerTitle">Nenhuma música selecionada</p>
+          <span id="playerChannel">-</span>
+        </div>
+      </div>
+      
+      <!-- Player Oficial do YouTube (Invisível/Miniaturizado) -->
+      <div class="yt-container">
+        <div id="youtubePlayer"></div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="app.js"></script>
+</body>
+</html>
