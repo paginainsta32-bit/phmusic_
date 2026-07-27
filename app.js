@@ -1,5 +1,4 @@
-// Substitua pela URL gerada no seu Cloudflare Worker
-const WORKER_URL = 'https://patient-violet-d9a6music-proxy.paginainsta32.workers.dev/'; 
+const WORKER_URL = 'https://patient-violet-d9a6music-proxy.paginainsta32.workers.dev';
 
 const audioPlayer = document.getElementById('audioPlayer');
 
