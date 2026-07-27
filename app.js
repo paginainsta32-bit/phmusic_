@@ -1,17 +1,16 @@
-// Sua Chave da YouTube Data API v3 do Google Cloud
 const API_KEY = 'AIzaSyDL50wL4YCySX2UFmvA5CEct5AhNDwAlmI';
 
 let player;
 
-// Inicializa o Player IFrame do YouTube (oculto)
+// Inicializa o Player IFrame oficial
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('youtubePlayer', {
-    height: '1',
-    width: '1',
+    height: '60',
+    width: '200',
     videoId: '',
     playerVars: {
       'autoplay': 1,
-      'controls': 0
+      'controls': 1
     }
   });
 }
@@ -25,7 +24,6 @@ async function searchMusic() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  // Busca oficial na API do YouTube (categoria 10 = Músicas)
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${API_KEY}`;
 
   try {
@@ -35,8 +33,8 @@ async function searchMusic() {
     if (data.items && data.items.length > 0) {
       renderResults(data.items);
     } else if (data.error) {
-      console.error('Erro na API do Google:', data.error.message);
-      alert('Erro na chave de API do Google: ' + data.error.message);
+      console.error('Erro na API:', data.error.message);
+      alert('Erro na chave de API: ' + data.error.message);
     } else {
       alert('Nenhuma música encontrada.');
     }
@@ -70,16 +68,19 @@ function renderResults(items) {
 }
 
 function playSong(videoId, title, artist, thumb) {
+  document.getElementById('playerTitle').innerText = title;
+  document.getElementById('playerChannel').innerText = artist;
+  document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
+
   if (player && player.loadVideoById) {
     player.loadVideoById(videoId);
-    
-    document.getElementById('playerTitle').innerText = title;
-    document.getElementById('playerChannel').innerText = artist;
-    document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
+    // Garante que o comando de play é executado após a ação de clique do usuário
+    if (player.playVideo) {
+      player.playVideo();
+    }
   }
 }
 
-// Busca inicial automática ao abrir a página
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('searchInput').value = 'Felipe Amorim';
   setTimeout(searchMusic, 500);
