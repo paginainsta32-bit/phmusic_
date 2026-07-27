@@ -38,3 +38,43 @@ audio::-webkit-media-controls-panel {
   opacity: 0;
   position: absolute;
 }
+.player-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 90px;
+  background: #181818;
+  border-top: 1px solid #282828;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.track-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  max-width: 60%;
+}
+
+.track-info img {
+  width: 55px;
+  height: 55px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* Tamanho visível mínimo permitido pelo YouTube para reprodução instantânea */
+.yt-container {
+  width: 200px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.yt-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
