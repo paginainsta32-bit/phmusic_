@@ -1,26 +1,26 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music Player</title>
+  <title>Meu Spotify - Jamendo Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>🎵 Meu Spotify</h1>
+      <h1>🎵 Jamendo Stream</h1>
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Buscar música ou artista...">
+        <input type="text" id="searchInput" placeholder="Buscar música, artista ou gênero (ex: rock)...">
         <button id="searchBtn">Buscar</button>
       </div>
     </header>
 
     <main id="resultsList" class="results-grid">
-      <!-- Músicas buscadas aparecerão aqui -->
+      <!-- Músicas vão aparecer aqui -->
     </main>
 
-    <!-- Player Fixo Estilo Spotify no Rodapé -->
+    <!-- Player Fixo no Rodapé -->
     <footer class="player-bar">
       <div class="track-info">
         <img id="playerThumb" src="https://via.placeholder.com/60" alt="Capa">
@@ -30,14 +30,13 @@
         </div>
       </div>
       
-      <!-- Player Oficial do YouTube (Invisível/Miniaturizado) -->
-      <div class="yt-container">
-        <div id="youtubePlayer"></div>
+      <!-- Control do Áudio Nativo sem Anúncios -->
+      <div class="audio-container">
+        <audio id="audioPlayer" controls autoplay style="width: 100%; max-width: 400px; height: 40px;"></audio>
       </div>
     </footer>
   </div>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="app.js"></script>
 </body>
 </html>
