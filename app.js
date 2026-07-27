@@ -1,5 +1,5 @@
-// Instância estável do Piped API (CORS 100% liberado para navegadores)
-const PIPED_API = 'https://pipedapi.kavin.rocks';
+// Substitua pela URL gerada no seu Cloudflare Worker
+const WORKER_URL = 'https://patient-violet-d9a6music-proxy.paginainsta32.workers.dev/'; 
 
 const audioPlayer = document.getElementById('audioPlayer');
 
@@ -12,11 +12,8 @@ async function searchMusic() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  // Endpoint de busca do Piped
-  const url = `${PIPED_API}/search?q=${encodeURIComponent(query)}&filter=music`;
-
   try {
-    const res = await fetch(url);
+    const res = await fetch(`${WORKER_URL}/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
 
     if (data.items && data.items.length > 0) {
@@ -25,7 +22,7 @@ async function searchMusic() {
       alert('Nenhuma música encontrada.');
     }
   } catch (err) {
-    console.error('Erro na busca Piped:', err);
+    console.error('Erro ao conectar ao Worker:', err);
     alert('Erro ao conectar ao servidor de músicas.');
   }
 }
@@ -35,7 +32,6 @@ function renderResults(items) {
   list.innerHTML = '';
 
   items.forEach(item => {
-    // Filtra apenas vídeos/músicas (ignora canais/playlists soltas)
     if (item.type !== 'stream') return;
 
     const videoId = item.url.replace('/watch?v=', '');
@@ -60,13 +56,10 @@ async function playSong(videoId, title, artist, thumb) {
   document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
 
   try {
-    // Obtém as URLs diretas de streaming de áudio
-    const res = await fetch(`${PIPED_API}/streams/${videoId}`);
+    const res = await fetch(`${WORKER_URL}/stream?id=${videoId}`);
     const data = await res.json();
 
-    // Filtra para pegar a melhor faixa de áudio direto sem vídeo (M4A/WebM)
     if (data.audioStreams && data.audioStreams.length > 0) {
-      // Pega o áudio de boa qualidade e compatível com navegadores
       const audioStream = data.audioStreams.find(s => s.mimeType.includes('audio/mp4')) || data.audioStreams[0];
       
       audioPlayer.src = audioStream.url;
@@ -74,11 +67,11 @@ async function playSong(videoId, title, artist, thumb) {
 
       document.getElementById('playerTitle').innerText = title;
     } else {
-      alert('Faixa de áudio indisponível para este vídeo.');
+      alert('Faixa de áudio indisponível.');
     }
   } catch (err) {
     console.error('Erro ao obter áudio:', err);
-    alert('Não foi possível carregar o áudio desta música.');
+    alert('Não foi possível carregar o áudio.');
   }
 }
 
