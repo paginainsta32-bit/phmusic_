@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Spotify - YouTube Edition</title>
+  <title>Meu Spotify</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,13 +25,13 @@
       <div class="track-info">
         <img id="playerThumb" src="https://via.placeholder.com/60" alt="Capa">
         <div>
-          <p id="playerTitle">Nenhuma música selecionada</p>
+          <p id="playerTitle">Selecione uma música para tocar</p>
           <span id="playerChannel">-</span>
         </div>
       </div>
       
-      <!-- Container do vídeo minimizado (1x1px para manter o áudio rodando oficial) -->
-      <div class="yt-hidden">
+      <!-- Player Visível Compacto (Permite o Play do Chrome) -->
+      <div class="yt-container">
         <div id="youtubePlayer"></div>
       </div>
     </footer>
