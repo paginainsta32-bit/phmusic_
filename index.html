@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Spotify - Deezer Edition</title>
+  <title>Meu Spotify - YouTube Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>🎵 Deezer Stream</h1>
+      <h1>🎵 Meu Spotify</h1>
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Buscar artista nacional, música, banda...">
         <button id="searchBtn">Buscar</button>
@@ -17,7 +17,7 @@
     </header>
 
     <main id="resultsList" class="results-grid">
-      <!-- Músicas da Deezer serão renderizadas aqui -->
+      <!-- Músicas renderizadas aqui -->
     </main>
 
     <!-- Player Fixo no Rodapé -->
@@ -30,13 +30,14 @@
         </div>
       </div>
       
-      <!-- Player de Áudio Nativo HTML5 -->
-      <div class="audio-container">
-        <audio id="audioPlayer" controls autoplay style="width: 100%; max-width: 400px; height: 40px;"></audio>
+      <!-- Container do vídeo minimizado (1x1px para manter o áudio rodando oficial) -->
+      <div class="yt-hidden">
+        <div id="youtubePlayer"></div>
       </div>
     </footer>
   </div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="app.js"></script>
 </body>
 </html>
