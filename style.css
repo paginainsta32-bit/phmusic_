@@ -19,3 +19,15 @@ header { padding: 20px; background: #000; display: flex; flex-direction: column;
 .track-info { display: flex; align-items: center; gap: 15px; }
 .track-info img { width: 50px; height: 50px; border-radius: 4px; }
 .yt-container { width: 200px; height: 60px; overflow: hidden; }
+.audio-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  max-width: 400px;
+}
+
+/* Garante o estilo dark no player nativo em navegadores suportados */
+audio::-webkit-media-controls-panel {
+  background-color: #282828;
+}
