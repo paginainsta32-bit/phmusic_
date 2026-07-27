@@ -1,12 +1,6 @@
-// Lista de instâncias públicas de alta disponibilidade
-const INSTANCES = [
-  'https://invidious.nerdvpn.de',
-  'https://invidious.flokinet.to',
-  'https://inv.riverside.rocks',
-  'https://invidious.drgns.space'
-];
+// Instância estável do Piped API (CORS 100% liberado para navegadores)
+const PIPED_API = 'https://pipedapi.kavin.rocks';
 
-let currentInstanceIndex = 0;
 const audioPlayer = document.getElementById('audioPlayer');
 
 document.getElementById('searchBtn').addEventListener('click', searchMusic);
@@ -14,78 +8,78 @@ document.getElementById('searchInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') searchMusic();
 });
 
-// Função para buscar tentando servidores alternativos caso um falhe
-async function fetchWithFallback(endpoint) {
-  for (let i = 0; i < INSTANCES.length; i++) {
-    const instance = INSTANCES[(currentInstanceIndex + i) % INSTANCES.length];
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // Timeout de 4s por servidor
-
-      const res = await fetch(`${instance}${endpoint}`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        currentInstanceIndex = (currentInstanceIndex + i) % INSTANCES.length; // Guarda o servidor que funcionou
-        return { data: await res.json(), activeInstance: instance };
-      }
-    } catch (err) {
-      console.warn(`Instância ${instance} falhou, tentando próxima...`);
-    }
-  }
-  throw new Error('Todas as instâncias falharam.');
-}
-
 async function searchMusic() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
 
-  try {
-    const { data, activeInstance } = await fetchWithFallback(`/api/v1/search?q=${encodeURIComponent(query)}&type=video`);
+  // Endpoint de busca do Piped
+  const url = `${PIPED_API}/search?q=${encodeURIComponent(query)}&filter=music`;
 
-    if (data && data.length > 0) {
-      renderResults(data, activeInstance);
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.items && data.items.length > 0) {
+      renderResults(data.items);
     } else {
-      alert('Nenhuma música encontrada com esse termo.');
+      alert('Nenhuma música encontrada.');
     }
   } catch (err) {
-    console.error('Erro de conexão:', err);
-    alert('Erro de conexão ao buscar faixas. Verifique sua rede e tente novamente.');
+    console.error('Erro na busca Piped:', err);
+    alert('Erro ao conectar ao servidor de músicas.');
   }
 }
 
-function renderResults(videos, activeInstance) {
+function renderResults(items) {
   const list = document.getElementById('resultsList');
   list.innerHTML = '';
 
-  videos.forEach(video => {
-    const coverUrl = video.videoThumbnails && video.videoThumbnails.length > 0
-      ? video.videoThumbnails.find(t => t.quality === 'medium' || t.quality === 'high')?.url || video.videoThumbnails[0].url
-      : 'https://via.placeholder.com/150';
+  items.forEach(item => {
+    // Filtra apenas vídeos/músicas (ignora canais/playlists soltas)
+    if (item.type !== 'stream') return;
 
-    // Stream direto da instância que está ativa no momento
-    const streamUrl = `${activeInstance}/latest_version?id=${video.videoId}&italic=1`;
+    const videoId = item.url.replace('/watch?v=', '');
+    const coverUrl = item.thumbnail || 'https://via.placeholder.com/150';
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
       <img src="${coverUrl}" alt="Capa">
-      <h3>${video.title}</h3>
-      <p style="font-size:12px; color:#aaa;">${video.author}</p>
+      <h3>${item.title}</h3>
+      <p style="font-size:12px; color:#aaa;">${item.uploaderName}</p>
     `;
     
-    card.onclick = () => playSong(streamUrl, video.title, video.author, coverUrl);
+    card.onclick = () => playSong(videoId, item.title, item.uploaderName, coverUrl);
     list.appendChild(card);
   });
 }
 
-function playSong(audioUrl, title, artist, thumb) {
-  audioPlayer.src = audioUrl;
-  audioPlayer.play();
-
-  document.getElementById('playerTitle').innerText = title;
+async function playSong(videoId, title, artist, thumb) {
+  document.getElementById('playerTitle').innerText = 'Carregando áudio...';
   document.getElementById('playerChannel').innerText = artist;
   document.getElementById('playerThumb').src = thumb || 'https://via.placeholder.com/60';
+
+  try {
+    // Obtém as URLs diretas de streaming de áudio
+    const res = await fetch(`${PIPED_API}/streams/${videoId}`);
+    const data = await res.json();
+
+    // Filtra para pegar a melhor faixa de áudio direto sem vídeo (M4A/WebM)
+    if (data.audioStreams && data.audioStreams.length > 0) {
+      // Pega o áudio de boa qualidade e compatível com navegadores
+      const audioStream = data.audioStreams.find(s => s.mimeType.includes('audio/mp4')) || data.audioStreams[0];
+      
+      audioPlayer.src = audioStream.url;
+      audioPlayer.play();
+
+      document.getElementById('playerTitle').innerText = title;
+    } else {
+      alert('Faixa de áudio indisponível para este vídeo.');
+    }
+  } catch (err) {
+    console.error('Erro ao obter áudio:', err);
+    alert('Não foi possível carregar o áudio desta música.');
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
